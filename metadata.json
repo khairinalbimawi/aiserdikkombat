@@ -1,0 +1,6 @@
+{
+  "name": "Asisten TPG & Dapodik SMKPP Negeri Bima",
+  "description": "Asisten Chat AI Tunjangan Profesi Guru (TPG) & Dapodik Khusus Guru SMKPP Negeri Bima ditenagai aturan Permen 11/2025, Kepmen 221/P/2025, dan Kepmen 222/O/2025.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
