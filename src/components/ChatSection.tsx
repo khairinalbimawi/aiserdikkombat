@@ -43,7 +43,7 @@ export default function ChatSection() {
 
   // Connection settings states for GitHub Pages fallback
   const [showSettings, setShowSettings] = useState(false);
-  const [githubApiKey, setGithubApiKey] = useState(() => localStorage.getItem('github_gemini_api_key') || '');
+  const [githubApiKey, setGithubApiKey] = useState(() => localStorage.getItem('github_gemini_api_key') || 'AIzaSyBexPtpTzb_p9KnJH7HxTUoens5_ZHHH28');
   const [githubModel, setGithubModel] = useState(() => localStorage.getItem('github_gemini_model') || 'gemini-2.5-flash');
   const [customApiUrl, setCustomApiUrl] = useState(() => localStorage.getItem('custom_api_url') || '');
 
@@ -480,9 +480,9 @@ Gunakan bahasa Indonesia yang santun, jelas, dan mengutamakan penyelesaian masal
                 <button
                   type="button"
                   onClick={() => {
-                    setTempApiKey('');
+                    setTempApiKey('AIzaSyBexPtpTzb_p9KnJH7HxTUoens5_ZHHH28');
                     setTempApiUrl('');
-                    handleSaveSettings('', 'gemini-2.5-flash', '');
+                    handleSaveSettings('AIzaSyBexPtpTzb_p9KnJH7HxTUoens5_ZHHH28', 'gemini-2.5-flash', '');
                   }}
                   className="px-2.5 py-1 text-xs text-red-600 bg-red-50 hover:bg-red-100 font-semibold rounded-lg transition duration-200"
                 >
