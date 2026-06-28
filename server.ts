@@ -12,6 +12,17 @@ async function startServer() {
 
   app.use(express.json());
 
+  // Enable CORS for all requests (necessary for GitHub Pages and Android/Capacitor apps)
+  app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    if (req.method === "OPTIONS") {
+      return res.sendStatus(200);
+    }
+    next();
+  });
+
   // Helper to initialize Gemini client with safe error handling
   const getGeminiClient = () => {
     const apiKey = process.env.GEMINI_API_KEY;
