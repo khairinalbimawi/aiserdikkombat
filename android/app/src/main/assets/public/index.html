@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Asisten TPG & Dapodik SMKPP Negeri Bima</title>
+    <script>
+      (function() {
+        function patchGetterOnly(prop) {
+          try {
+            var original = window[prop];
+            var custom = original;
+            Object.defineProperty(window, prop, {
+              get: function() {
+                return custom;
+              },
+              set: function(val) {
+                custom = val;
+              },
+              configurable: true,
+              enumerable: true
+            });
+          } catch (e) {
+            console.warn('Failed to patch ' + prop + ':', e);
+          }
+        }
+        patchGetterOnly('fetch');
+        patchGetterOnly('Request');
+        patchGetterOnly('Response');
+        patchGetterOnly('Headers');
+      })();
+    </script>
+    <script type="module" crossorigin src="./assets/index-rRT94Itd.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DmeBTw2_.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+

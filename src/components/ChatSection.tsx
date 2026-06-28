@@ -53,7 +53,14 @@ export default function ChatSection() {
     setIsLoading(true);
 
     try {
-      const apiBaseUrl = (import.meta as any).env?.VITE_API_URL || '';
+      let apiBaseUrl = (import.meta as any).env?.VITE_API_URL || '';
+      if (!apiBaseUrl && (
+        window.location.hostname.includes('github.io') ||
+        window.location.protocol === 'capacitor:' ||
+        (window.location.hostname === 'localhost' && window.location.port !== '3000')
+      )) {
+        apiBaseUrl = 'https://ais-pre-yuqohpl6o5cfjzawjpbwon-999280204895.asia-southeast1.run.app';
+      }
       const response = await fetch(`${apiBaseUrl}/api/chat`, {
         method: 'POST',
         headers: {
