@@ -15,14 +15,28 @@ const SUGGESTED_PROMPTS = [
 ];
 
 export default function ChatSection() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 'welcome',
-      sender: 'assistant',
-      content: 'Selamat datang, Bapak/Ibu Guru hebat di **SMKPP Negeri Bima**! Saya adalah **Asisten TPG & Dapodik SMKPPN Bima** yang dikembangkan oleh **Tim Digitalisasi Sekolah**. Saya siap mendampingi Bapak/Ibu dalam mengkonsultasikan syarat tunjangan sertifikasi (TPG), aturan linieritas kejuruan pertanian/umum (Permen 11/2025), aturan beban mengajar SMK (Kepmen 222/O/2025), serta kelayakan dapodik untuk pencairan tunjangan. Ada yang bisa saya bantu hari ini?',
-      timestamp: new Date()
+  const [messages, setMessages] = useState<Message[]>(() => {
+    try {
+      const saved = localStorage.getItem('tpg_chat_history');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.map((m: any) => ({
+          ...m,
+          timestamp: new Date(m.timestamp)
+        }));
+      }
+    } catch (e) {
+      console.error("Failed to load chat history:", e);
     }
-  ]);
+    return [
+      {
+        id: 'welcome',
+        sender: 'assistant',
+        content: 'Selamat datang, Bapak/Ibu Guru hebat di **SMKPP Negeri Bima**! Saya adalah **Asisten TPG & Dapodik SMKPPN Bima** yang dikembangkan oleh **Tim Digitalisasi Sekolah**. Saya siap mendampingi Bapak/Ibu dalam mengkonsultasikan syarat tunjangan sertifikasi (TPG), aturan linieritas kejuruan pertanian/umum (Permen 11/2025), aturan beban mengajar SMK (Kepmen 222/O/2025), serta kelayakan dapodik untuk pencairan tunjangan. Ada yang bisa saya bantu hari ini?',
+        timestamp: new Date()
+      }
+    ];
+  });
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -36,6 +50,14 @@ export default function ChatSection() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoading]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('tpg_chat_history', JSON.stringify(messages));
+    } catch (e) {
+      console.error("Failed to save chat history:", e);
+    }
+  }, [messages]);
 
   const handleSendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -54,12 +76,13 @@ export default function ChatSection() {
 
     try {
       let apiBaseUrl = (import.meta as any).env?.VITE_API_URL || '';
-      if (!apiBaseUrl && (
-        window.location.hostname.includes('github.io') ||
-        window.location.protocol === 'capacitor:' ||
-        (window.location.hostname === 'localhost' && window.location.port !== '3000')
-      )) {
-        apiBaseUrl = 'https://ais-pre-yuqohpl6o5cfjzawjpbwon-999280204895.asia-southeast1.run.app';
+      if (!apiBaseUrl) {
+        const isLocalhost3000 = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port === '3000';
+        const isCloudRun = window.location.hostname.includes('run.app');
+        
+        if (!isLocalhost3000 && !isCloudRun) {
+          apiBaseUrl = 'https://ais-dev-yuqohpl6o5cfjzawjpbwon-999280204895.asia-southeast1.run.app';
+        }
       }
       const response = await fetch(`${apiBaseUrl}/api/chat`, {
         method: 'POST',

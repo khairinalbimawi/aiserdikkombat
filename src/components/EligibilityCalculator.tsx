@@ -8,7 +8,11 @@ import { EligibilityResult } from '../types';
 import { TASK_EQUIVALENCES } from '../data/rulesData';
 import { Calculator, CheckCircle2, XCircle, ChevronRight, RefreshCw, AlertCircle } from 'lucide-react';
 
-export default function EligibilityCalculator() {
+interface EligibilityCalculatorProps {
+  onScoreChange?: (score: number | null) => void;
+}
+
+export default function EligibilityCalculator({ onScoreChange }: EligibilityCalculatorProps) {
   // Form State
   const [hasSerdik, setHasSerdik] = useState<boolean | null>(null);
   const [isDapodikActive, setIsDapodikActive] = useState<boolean | null>(null);
@@ -112,6 +116,9 @@ export default function EligibilityCalculator() {
       checklist,
       recommendations
     });
+    if (onScoreChange) {
+      onScoreChange(score);
+    }
   };
 
   const handleReset = () => {
@@ -123,6 +130,9 @@ export default function EligibilityCalculator() {
     setSelectedTasks([]);
     setIsRatioMet(null);
     setResult(null);
+    if (onScoreChange) {
+      onScoreChange(null);
+    }
   };
 
   return (

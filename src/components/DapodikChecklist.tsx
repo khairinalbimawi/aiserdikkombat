@@ -7,8 +7,12 @@ import React, { useState } from 'react';
 import { DAPODIK_CHECKLIST } from '../data/rulesData';
 import { ClipboardCheck, Info, RotateCcw, AlertTriangle } from 'lucide-react';
 
-export default function DapodikChecklist() {
-  const [checkedItems, setCheckedItems] = useState<string[]>([]);
+interface DapodikChecklistProps {
+  checkedItems: string[];
+  setCheckedItems: React.Dispatch<React.SetStateAction<string[]>>;
+}
+
+export default function DapodikChecklist({ checkedItems, setCheckedItems }: DapodikChecklistProps) {
 
   // Calculate total items
   const totalItemsCount = DAPODIK_CHECKLIST.reduce((sum, section) => sum + section.items.length, 0);
