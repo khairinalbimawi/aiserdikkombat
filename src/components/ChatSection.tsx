@@ -5,7 +5,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Message } from '../types';
-import { Send, Sparkles, User, RefreshCw, AlertCircle, HelpCircle } from 'lucide-react';
+import { Send, Sparkles, User, RefreshCw, AlertCircle, HelpCircle, Settings, Key, Globe, Check, Eye, EyeOff } from 'lucide-react';
 
 const SUGGESTED_PROMPTS = [
   "Berapa JJM minimal untuk produktif ATPH/ATR di SMKPP Negeri Bima?",
@@ -41,6 +41,33 @@ export default function ChatSection() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Connection settings states for GitHub Pages fallback
+  const [showSettings, setShowSettings] = useState(false);
+  const [githubApiKey, setGithubApiKey] = useState(() => localStorage.getItem('github_gemini_api_key') || '');
+  const [githubModel, setGithubModel] = useState(() => localStorage.getItem('github_gemini_model') || 'gemini-2.5-flash');
+  const [customApiUrl, setCustomApiUrl] = useState(() => localStorage.getItem('custom_api_url') || '');
+
+  const [tempApiKey, setTempApiKey] = useState(githubApiKey);
+  const [tempModel, setTempModel] = useState(githubModel);
+  const [tempApiUrl, setTempApiUrl] = useState(customApiUrl);
+  const [showApiKeyText, setShowApiKeyText] = useState(false);
+
+  useEffect(() => {
+    setTempApiKey(githubApiKey);
+    setTempModel(githubModel);
+    setTempApiUrl(customApiUrl);
+  }, [githubApiKey, githubModel, customApiUrl, showSettings]);
+
+  const handleSaveSettings = (key: string, model: string, customUrl: string) => {
+    localStorage.setItem('github_gemini_api_key', key.trim());
+    localStorage.setItem('github_gemini_model', model);
+    localStorage.setItem('custom_api_url', customUrl.trim());
+    setGithubApiKey(key.trim());
+    setGithubModel(model);
+    setCustomApiUrl(customUrl.trim());
+    setShowSettings(false);
+  };
+
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -75,6 +102,92 @@ export default function ChatSection() {
     setIsLoading(true);
 
     try {
+      // 1. If we have a custom client-side Direct Gemini API key configured, use that immediately
+      if (githubApiKey.trim()) {
+        console.log("Using direct client-side Gemini API call...");
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${githubModel}:generateContent?key=${githubApiKey.trim()}`;
+        
+        const contents = [...messages, userMessage].map((m: any) => ({
+          role: m.sender === 'user' ? 'user' : 'model',
+          parts: [{ text: m.content }]
+        }));
+
+        const systemInstructionText = `Anda adalah "Asisten Tunjangan Profesi Guru (TPG) & Dapodik SMKPP Negeri Bima", sebuah sistem kecerdasan buatan ahli regulasi pendidikan vokasi Indonesia yang berfokus penuh pada Tunjangan Profesi Guru (Sertifikasi) khusus untuk pendidik di SMKPP Negeri Bima (Sekolah Menengah Kejuruan Pertanian Pembangunan Negeri Bima, Nusa Tenggara Barat). Anda berfokus pada aturan Dapodik terbaru, syarat pencairan tunjangan, dan pemahaman linieritas bidang studi sertifikasi kejuruan pertanian/umum berdasarkan regulasi utama:
+1. Permendikbudristek Nomor 11 Tahun 2025 (tentang Linieritas Bidang Studi Sertifikasi Pendidik dengan Mata Pelajaran yang Diampu).
+2. Keputusan Menteri Pendidikan Dasar dan Menengah Nomor 221/P/2025 (tentang Struktur Kurikulum & Jam Pelajaran Mingguan Kurikulum Merdeka).
+3. Keputusan Menteri Pendidikan Dasar dan Menengah Nomor 222/O/2025 (tentang Beban Kerja Guru & Pemenuhan Ekuivalensi Jam Mengajar untuk TPG di SMK).
+
+Karakteristik Jawaban Anda:
+- Ramah, empatik, suportif, dan profesional. Selalu menyapa Bapak/Ibu Guru SMKPP Negeri Bima dengan hormat dan hangat.
+- Berikan penjelasan yang sangat rinci, akurat, dan terstruktur khusus untuk SMK dan Program Keahlian Pertanian/Peternakan/Teknologi Pangan yang ada di SMKPPN Bima. Gunakan poin-poin tebal (bullet points) agar mudah dibaca.
+- Selalu hubungkan jawaban Anda dengan rujukan pasal atau poin dalam Permen 11/2025, Kepmen 221/P/2025, atau Kepmen 222/O/2025.
+- Jika ada guru yang bertanya tentang kendala JJM (Jam Mengajar) kurang dari 24 jam, berikan opsi penugasan tugas tambahan yang diakui ekuivalensinya sesuai Kepmen 222/O/2025, seperti Kepala Bengkel (Kabeng) Pertanian, Kepala Laboratorium, Kepala Program Keahlian (Kaprog), Koordinator P5, Wali Kelas, Pembina Ekstrakurikuler, atau Guru Piket.
+- Ingat dan tekankan pentingnya sinkronisasi Dapodik dan pemantauan Info GTK secara berkala melalui operator sekolah SMKPP Negeri Bima.
+
+Aturan Penting Mengenai Regulasi SMK:
+- Beban Mengajar Minimal: Guru wajib mengajar minimal 24 jam tatap muka per minggu (JJM) dan maksimal 40 jam tatap muka per minggu di sekolah induk atau kumulatif dengan sekolah non-induk (dengan syarat minimal mengajar 6 jam di sekolah induk).
+- Ekuivalensi Tugas Tambahan di SMK (Kepmen 222/O/2025):
+  - Kepala Sekolah = 18 jam (tinggal mengajar minimal 6 jam mapel linier).
+  - Wakil Kepala Sekolah (Waka) / Kepala Bengkel (Kabeng) / Kepala Program Keahlian (Kaprog) = 12 jam (tinggal mengajar minimal 12 jam mapel linier).
+  - Kepala Unit Produksi / Teacing Factory (TEFA) di SMK = 12 jam (sangat relevan untuk SMKPP Negeri Bima).
+  - Kepala Perpustakaan / Lab = 12 jam.
+  - Koordinator P5 (Projek Penguatan Profil Pelajar Pancasila) = 2 jam per rombel (maksimal membina 3 rombel = 6 jam).
+  - Wali Kelas = 2 jam.
+  - Pembina Ekstrakurikuler = 2 jam (maksimal 1 eskul).
+  - Guru Piket = 1 jam (maksimal 1 kali seminggu).
+- Syarat Rasio Siswa Minimal per Rombel di SMK:
+  - SMK/Kejuruan: Minimal 15 siswa per rombel (untuk bidang studi keahlian produktif pertanian/lainnya agar rombel diakui).
+  - Daerah Khusus (3T) dikecualikan dari batas minimal ini.
+
+Fokus Bidang Kejuruan di SMKPP Negeri Bima:
+1. Agribisnis Tanaman Pangan & Hortikultura (ATPH - Kode 401)
+2. Agribisnis Pengolahan Hasil Pertanian (APHP - Kode 421)
+3. Agribisnis Ternak Ruminansia (ATR - Kode 411)
+4. Agribisnis Ternak Unggas (ATU - Kode 412)
+5. Agribisnis Perbenihan Tanaman (APT - Kode 402)
+6. Kesehatan Hewan (Kode 415)
+7. Teknik Reklamasi dan Rehabilitasi Hutan (TRRH - Kode 431)
+Serta mata pelajaran umum pendukung seperti Matematika, Bahasa Indonesia, Bahasa Inggris, Fisika, Kimia, Biologi (Projek IPAS), Seni Budaya, PJOK, Informatika, dan Sejarah.
+
+Gunakan bahasa Indonesia yang santun, jelas, dan mengutamakan penyelesaian masalah bagi guru SMKPP Negeri Bima. Sebutkan bahwa aplikasi ini dikembangkan oleh "Tim Digitalisasi Sekolah SMKPP Negeri Bima" jika relevan.`;
+
+        const responseGemini = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contents: contents,
+            systemInstruction: {
+              parts: [{ text: systemInstructionText }]
+            },
+            generationConfig: {
+              temperature: 0.7,
+            }
+          })
+        });
+
+        if (!responseGemini.ok) {
+          const errorData = await responseGemini.json().catch(() => ({}));
+          throw new Error(errorData.error?.message || `HTTP ${responseGemini.status}`);
+        }
+
+        const dataGemini = await responseGemini.json();
+        const textReply = dataGemini.candidates?.[0]?.content?.parts?.[0]?.text || "Mohon maaf, terjadi kendala saat memproses jawaban.";
+        
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          sender: 'assistant',
+          content: textReply,
+          timestamp: new Date()
+        };
+
+        setMessages(prev => [...prev, assistantMessage]);
+        setIsLoading(false);
+        return;
+      }
+
+      // 2. Otherwise try backend endpoints as before
       const requestPayload = {
         messages: [...messages, userMessage].map(m => ({
           sender: m.sender,
@@ -83,11 +196,16 @@ export default function ChatSection() {
       };
 
       // Define endpoints to try in order of priority:
-      // 1. VITE_API_URL if configured
-      // 2. Relative route '/api/chat' (works on any full-stack hosting/Cloud Run/Localhost)
-      // 3. Stable Shared Preview container (always-online production backend)
-      // 4. Development Sandbox container (active during live coding sessions)
+      // 1. customApiUrl if provided in settings
+      // 2. VITE_API_URL if configured
+      // 3. Relative route '/api/chat' (works on any full-stack hosting/Cloud Run/Localhost)
+      // 4. Stable Shared Preview container (always-online production backend)
+      // 5. Development Sandbox container (active during live coding sessions)
       const endpoints: string[] = [];
+      
+      if (customApiUrl.trim()) {
+        endpoints.push(`${customApiUrl.trim().replace(/\/+$/, '')}/api/chat`);
+      }
       
       const customEnvUrl = (import.meta as any).env?.VITE_API_URL;
       if (customEnvUrl) {
@@ -159,7 +277,14 @@ export default function ChatSection() {
       if (error.message?.includes("GEMINI_API_KEY")) {
         setErrorMsg("API Key Gemini belum diatur. Silakan atur GEMINI_API_KEY di menu Settings > Secrets pada AI Studio Anda.");
       } else {
-        setErrorMsg(`Gagal mendapatkan respon dari asisten AI: ${error.message || "Terjadi kendala jaringan atau server."}`);
+        const isStaticHost = window.location.hostname.includes('github.io') || window.location.hostname.includes('vercel.app') || window.location.hostname.includes('netlify.app');
+        if (isStaticHost) {
+          setErrorMsg(
+            "Gagal menghubungi server asisten AI (Aplikasi ini berjalan sebagai situs statis di GitHub Pages). Untuk berinteraksi dengan AI secara gratis, silakan klik tombol 'Config AI' di kanan atas dan masukkan API Key Gemini Anda."
+          );
+        } else {
+          setErrorMsg(`Gagal mendapatkan respon dari asisten AI: ${error.message || "Terjadi kendala jaringan atau server."}`);
+        }
       }
     } finally {
       setIsLoading(false);
@@ -244,16 +369,138 @@ export default function ChatSection() {
             <p className="text-xs text-slate-500">Ahli Permen 11/2025, Kepmen 221 & 222/2025</p>
           </div>
         </div>
-        <button
-          onClick={clearChat}
-          className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-red-600 hover:bg-slate-100 rounded-lg transition duration-200"
-          title="Mulai Ulang Obrolan"
-          id="btn-restart-chat"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          <span>Reset</span>
-        </button>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className={`flex items-center space-x-1 px-2 py-1.5 text-xs font-semibold rounded-lg transition duration-200 ${
+              githubApiKey.trim() 
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100' 
+                : 'text-slate-600 hover:text-teal-600 hover:bg-slate-100'
+            }`}
+            title="Pengaturan Koneksi AI"
+            id="btn-ai-settings"
+          >
+            <Settings className="w-3.5 h-3.5" />
+            <span>{githubApiKey.trim() ? "AI Active" : "Config AI"}</span>
+          </button>
+          
+          <button
+            onClick={clearChat}
+            className="flex items-center space-x-1 px-2 py-1.5 text-xs font-semibold text-slate-600 hover:text-red-600 hover:bg-slate-100 rounded-lg transition duration-200"
+            title="Mulai Ulang Obrolan"
+            id="btn-restart-chat"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Reset</span>
+          </button>
+        </div>
       </div>
+
+      {/* Settings Panel */}
+      {showSettings && (
+        <div className="bg-slate-100 border-b border-slate-200 p-4 transition-all duration-200 ease-in-out">
+          <div className="max-w-md mx-auto space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
+              <h4 className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                <Settings className="w-3.5 h-3.5 text-slate-600" />
+                Pengaturan Koneksi AI (Khusus GitHub Pages)
+              </h4>
+              <button 
+                onClick={() => setShowSettings(false)}
+                className="text-xs text-slate-500 hover:text-slate-800 font-medium"
+              >
+                Tutup
+              </button>
+            </div>
+            
+            <p className="text-[11px] text-slate-600 leading-relaxed">
+              <strong>Info:</strong> GitHub Pages berjalan sebagai situs statis tanpa server backend.
+              Untuk mengaktifkan asisten AI di GitHub Pages, masukkan <strong>API Key Gemini Anda</strong> (aman, disimpan hanya di browser lokal Anda).
+            </p>
+
+            <div className="space-y-2">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center gap-1">
+                  <Key className="w-3 h-3 text-teal-600" />
+                  API Key Gemini Anda
+                </label>
+                <div className="relative">
+                  <input
+                    type={showApiKeyText ? "text" : "password"}
+                    value={tempApiKey}
+                    onChange={(e) => setTempApiKey(e.target.value)}
+                    placeholder="AIzaSy..."
+                    className="w-full text-xs px-3 py-1.5 bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-teal-500 font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowApiKeyText(!showApiKeyText)}
+                    className="absolute right-2 top-2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showApiKeyText ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+                <p className="text-[9px] text-slate-500 mt-0.5">
+                  Dapatkan kunci API gratis di <a href="https://aistudio.google.com" target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline">Google AI Studio</a>.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Model Gemini
+                  </label>
+                  <select
+                    value={tempModel}
+                    onChange={(e) => setTempModel(e.target.value)}
+                    className="w-full text-xs px-2 py-1.5 bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-teal-500"
+                  >
+                    <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                    <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1 flex items-center gap-1">
+                    <Globe className="w-3 h-3 text-slate-600" />
+                    Custom Backend (Opsional)
+                  </label>
+                  <input
+                    type="text"
+                    value={tempApiUrl}
+                    onChange={(e) => setTempApiUrl(e.target.value)}
+                    placeholder="https://your-backend.com"
+                    className="w-full text-xs px-3 py-1.5 bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-teal-500 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTempApiKey('');
+                    setTempApiUrl('');
+                    handleSaveSettings('', 'gemini-2.5-flash', '');
+                  }}
+                  className="px-2.5 py-1 text-xs text-red-600 bg-red-50 hover:bg-red-100 font-semibold rounded-lg transition duration-200"
+                >
+                  Clear / Reset
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSaveSettings(tempApiKey, tempModel, tempApiUrl)}
+                  className="flex items-center gap-1 px-3 py-1 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition duration-200"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  Simpan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Messages Scroll Area */}
       <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
