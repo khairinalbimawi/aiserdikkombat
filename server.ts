@@ -97,25 +97,54 @@ Gunakan bahasa Indonesia yang santun, jelas, dan mengutamakan penyelesaian masal
       const candidateModels = ["gemini-3.5-flash", "gemini-flash-latest", "gemini-3.1-flash-lite"];
       let response = null;
       let lastError = null;
+      const MAX_RETRIES = 2;
 
       for (const modelName of candidateModels) {
-        try {
-          console.log(`Attempting generation with model: ${modelName}`);
-          response = await ai.models.generateContent({
-            model: modelName,
-            contents: contents,
-            config: {
-              systemInstruction: systemInstruction,
-              temperature: 0.7,
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+          try {
+            console.log(`Attempt ${attempt} for model: ${modelName}`);
+            response = await ai.models.generateContent({
+              model: modelName,
+              contents: contents,
+              config: {
+                systemInstruction: systemInstruction,
+                temperature: 0.7,
+              }
+            });
+            if (response) {
+              console.log(`Success on attempt ${attempt} with model: ${modelName}`);
+              break;
             }
-          });
-          if (response) {
-            console.log(`Success with model: ${modelName}`);
-            break;
+          } catch (err: any) {
+            console.warn(`Attempt ${attempt} for model ${modelName} failed:`, err.message || err);
+            lastError = err;
+            const errStr = String(err.message || err || "").toLowerCase();
+            // Check if it is a transient error that can benefit from a retry (503, 429, Unavailable, High Demand, Resource Exhausted)
+            if (
+              errStr.includes("503") || 
+              errStr.includes("429") || 
+              errStr.includes("unavailable") || 
+              errStr.includes("high demand") || 
+              errStr.includes("resource") || 
+              errStr.includes("exhausted") ||
+              errStr.includes("temp") ||
+              errStr.includes("busy")
+            ) {
+              if (attempt < MAX_RETRIES) {
+                const waitTime = attempt * 1200; // Exponential backoff: 1200ms, then more
+                console.log(`Sleeping ${waitTime}ms before retry...`);
+                await new Promise((resolve) => setTimeout(resolve, waitTime));
+                continue;
+              }
+            }
+            // If it's a fatal client error (like 400 Bad Request, API key invalid etc.), don't retry, move on or throw
+            if (errStr.includes("400") || errStr.includes("invalid") || errStr.includes("key") || errStr.includes("permission")) {
+              break;
+            }
           }
-        } catch (err: any) {
-          console.warn(`Model ${modelName} failed:`, err.message || err);
-          lastError = err;
+        }
+        if (response) {
+          break;
         }
       }
 
