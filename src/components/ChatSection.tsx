@@ -84,18 +84,39 @@ export default function ChatSection() {
           apiBaseUrl = 'https://ais-dev-yuqohpl6o5cfjzawjpbwon-999280204895.asia-southeast1.run.app';
         }
       }
-      const response = await fetch(`${apiBaseUrl}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          messages: [...messages, userMessage].map(m => ({
-            sender: m.sender,
-            content: m.content
-          }))
-        })
-      });
+
+      let response;
+      const requestPayload = {
+        messages: [...messages, userMessage].map(m => ({
+          sender: m.sender,
+          content: m.content
+        }))
+      };
+
+      try {
+        response = await fetch(`${apiBaseUrl ? apiBaseUrl : ''}/api/chat`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestPayload)
+        });
+      } catch (fetchErr: any) {
+        // Fallback robustly to the development API URL if relative fetch failed (e.g. on Android or preview origins)
+        const fallbackUrl = 'https://ais-dev-yuqohpl6o5cfjzawjpbwon-999280204895.asia-southeast1.run.app';
+        if (apiBaseUrl !== fallbackUrl) {
+          console.warn("Relative fetch failed, attempting fallback to development API URL:", fetchErr);
+          response = await fetch(`${fallbackUrl}/api/chat`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestPayload)
+          });
+        } else {
+          throw fetchErr;
+        }
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

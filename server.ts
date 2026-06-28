@@ -94,7 +94,7 @@ Serta mata pelajaran umum pendukung seperti Matematika, Bahasa Indonesia, Bahasa
 
 Gunakan bahasa Indonesia yang santun, jelas, dan mengutamakan penyelesaian masalah bagi guru SMKPP Negeri Bima. Sebutkan bahwa aplikasi ini dikembangkan oleh "Tim Digitalisasi Sekolah SMKPP Negeri Bima" jika relevan.`;
 
-      const candidateModels = ["gemini-2.5-flash", "gemini-3.5-flash"];
+      const candidateModels = ["gemini-3.5-flash", "gemini-flash-latest", "gemini-3.1-flash-lite"];
       let response = null;
       let lastError = null;
 
