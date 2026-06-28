@@ -75,17 +75,6 @@ export default function ChatSection() {
     setIsLoading(true);
 
     try {
-      let apiBaseUrl = (import.meta as any).env?.VITE_API_URL || '';
-      if (!apiBaseUrl) {
-        const isLocalhost3000 = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port === '3000';
-        const isCloudRun = window.location.hostname.includes('run.app');
-        
-        if (!isLocalhost3000 && !isCloudRun) {
-          apiBaseUrl = 'https://ais-dev-yuqohpl6o5cfjzawjpbwon-999280204895.asia-southeast1.run.app';
-        }
-      }
-
-      let response;
       const requestPayload = {
         messages: [...messages, userMessage].map(m => ({
           sender: m.sender,
@@ -93,34 +82,66 @@ export default function ChatSection() {
         }))
       };
 
-      try {
-        response = await fetch(`${apiBaseUrl ? apiBaseUrl : ''}/api/chat`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(requestPayload)
-        });
-      } catch (fetchErr: any) {
-        // Fallback robustly to the development API URL if relative fetch failed (e.g. on Android or preview origins)
-        const fallbackUrl = 'https://ais-dev-yuqohpl6o5cfjzawjpbwon-999280204895.asia-southeast1.run.app';
-        if (apiBaseUrl !== fallbackUrl) {
-          console.warn("Relative fetch failed, attempting fallback to development API URL:", fetchErr);
-          response = await fetch(`${fallbackUrl}/api/chat`, {
+      // Define endpoints to try in order of priority:
+      // 1. VITE_API_URL if configured
+      // 2. Relative route '/api/chat' (works on any full-stack hosting/Cloud Run/Localhost)
+      // 3. Stable Shared Preview container (always-online production backend)
+      // 4. Development Sandbox container (active during live coding sessions)
+      const endpoints: string[] = [];
+      
+      const customEnvUrl = (import.meta as any).env?.VITE_API_URL;
+      if (customEnvUrl) {
+        endpoints.push(`${customEnvUrl.replace(/\/+$/, '')}/api/chat`);
+      }
+      
+      endpoints.push('/api/chat');
+      endpoints.push('https://ais-pre-yuqohpl6o5cfjzawjpbwon-999280204895.asia-southeast1.run.app/api/chat');
+      endpoints.push('https://ais-dev-yuqohpl6o5cfjzawjpbwon-999280204895.asia-southeast1.run.app/api/chat');
+
+      // Deduplicate
+      const uniqueEndpoints = Array.from(new Set(endpoints.filter(Boolean)));
+      
+      let response = null;
+      let success = false;
+      let lastFetchError: any = null;
+
+      for (const endpoint of uniqueEndpoints) {
+        try {
+          console.log(`Trying chat endpoint: ${endpoint}`);
+          
+          // If the endpoint is relative and we are running on a static domain like github.io, skip to avoid slow timeout 404
+          const isRelative = endpoint.startsWith('/');
+          const isStaticDomain = typeof window !== 'undefined' && 
+            (window.location.hostname.includes('github.io') || window.location.hostname.includes('vercel.app') || window.location.hostname.includes('netlify.app'));
+          
+          if (isRelative && isStaticDomain) {
+            console.log(`Skipping relative endpoint ${endpoint} because we are on a static domain: ${window.location.hostname}`);
+            continue;
+          }
+
+          response = await fetch(endpoint, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify(requestPayload)
           });
-        } else {
-          throw fetchErr;
+
+          if (response.ok) {
+            success = true;
+            break;
+          } else {
+            const errorData = await response.json().catch(() => ({}));
+            lastFetchError = new Error(errorData.error || `HTTP ${response.status}`);
+          }
+        } catch (err: any) {
+          console.warn(`Endpoint ${endpoint} failed:`, err);
+          lastFetchError = err;
         }
       }
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      if (!success || !response) {
+        throw lastFetchError || new Error("Semua server asisten AI sedang tidak aktif. Silakan hubungi operator.");
       }
 
       const data = await response.json();
@@ -214,7 +235,12 @@ export default function ChatSection() {
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-semibold text-slate-800 text-sm md:text-base">Konsultasi AI TPG & Dapodik</h3>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <h3 className="font-semibold text-slate-800 text-sm md:text-base">Konsultasi AI TPG & Dapodik</h3>
+              <span className="text-[9px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded-full font-bold">
+                Auto Sync
+              </span>
+            </div>
             <p className="text-xs text-slate-500">Ahli Permen 11/2025, Kepmen 221 & 222/2025</p>
           </div>
         </div>
