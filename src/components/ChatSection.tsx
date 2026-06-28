@@ -53,7 +53,8 @@ export default function ChatSection() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
+      const apiBaseUrl = (import.meta as any).env?.VITE_API_URL || '';
+      const response = await fetch(`${apiBaseUrl}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
