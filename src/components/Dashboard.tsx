@@ -91,7 +91,7 @@ export default function Dashboard({ onNavigate, checkedCount, totalChecklistCoun
 
           <div className="flex items-center gap-2 text-xs text-teal-50 bg-white/10 backdrop-blur-xs p-2.5 rounded-xl border border-white/5 max-w-fit font-medium">
             <MapPin className="w-3.5 h-3.5 text-emerald-300 animate-pulse shrink-0" />
-            <span>SMKPPN Bima • Jln. Kyai Haji Dewantara, Kota Bima, NTB</span>
+            <span>SMKPPN Bima • Jln. datuk dibanta No.155 a Jatiwangi,Kota Bima, NTB</span>
           </div>
         </div>
       </div>

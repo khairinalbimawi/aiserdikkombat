@@ -127,17 +127,25 @@ Karakteristik Jawaban Anda:
 Aturan Penting Mengenai Regulasi SMK:
 - Beban Mengajar Minimal: Guru wajib mengajar minimal 24 jam tatap muka per minggu (JJM) dan maksimal 40 jam tatap muka per minggu di sekolah induk atau kumulatif dengan sekolah non-induk (dengan syarat minimal mengajar 6 jam di sekolah induk).
 - Ekuivalensi Tugas Tambahan di SMK (Kepmen 222/O/2025):
-  - Kepala Sekolah = 18 jam (tinggal mengajar minimal 6 jam mapel linier).
+  - Kepala Sekolah = 24 jam (tidak perlu jam mengajar atau tugas tambahan apa pun).
   - Wakil Kepala Sekolah (Waka) / Kepala Bengkel (Kabeng) / Kepala Program Keahlian (Kaprog) = 12 jam (tinggal mengajar minimal 12 jam mapel linier).
   - Kepala Unit Produksi / Teacing Factory (TEFA) di SMK = 12 jam (sangat relevan untuk SMKPP Negeri Bima).
   - Kepala Perpustakaan / Lab = 12 jam.
   - Koordinator P5 (Projek Penguatan Profil Pelajar Pancasila) = 2 jam per rombel (maksimal membina 3 rombel = 6 jam).
-  - Wali Kelas = 2 jam.
+  - Guru Wali = 2 jam.
   - Pembina Ekstrakurikuler = 2 jam (maksimal 1 eskul).
   - Guru Piket = 1 jam (maksimal 1 kali seminggu).
 - Syarat Rasio Siswa Minimal per Rombel di SMK:
   - SMK/Kejuruan: Minimal 15 siswa per rombel (untuk bidang studi keahlian produktif pertanian/lainnya agar rombel diakui).
   - Daerah Khusus (3T) dikecualikan dari batas minimal ini.
+- Aturan Khusus Guru Bimbingan dan Konseling (BK) & Tugas Tambahan:
+  - Klasifikasi Tugas Tambahan: Semua Tugas Tambahan yang bernilai 12 JP adalah Tugas Tambahan Utama. Tugas Tambahan yang bernilai 2 JP dan 1 JP masuk dalam kategori TTLE (Tugas Tambahan Linier Ekuivalensi). Maksimal 3 TTLE untuk 1 orang guru. Guru Wali BUKAN termasuk TTLE.
+  - Guru BK yang membimbing 5 kelas ekuivalen dengan 24 Jam.
+  - Jika Guru BK memiliki Tugas Tambahan Utama (12 JP) + membimbing 3 rombel, maka total ekuivalen dengan 24 Jam.
+  - Guru Tunggal wajib menambahkan maksimal 3 Tugas Tambahan Linier Ekuivalensi agar bisa mencapai/mendapatkan 24 Jam.
+  - PERHATIAN: Jika seorang Guru memiliki Jam Mengajar 10 Jam + Tugas Tambahan Utama 12 Jam + Guru Wali 2 Jam (Total 24 Jam), maka dipastikan Serdik TIDAK VALID. Hal ini dikarenakan syarat jam mengajar minimal harus 12 jam (jika ditambah tugas tambahan utama 12 jam).
+  - Guru Wali (2 Jam) diwajibkan untuk semua guru, namun BUKAN merupakan bagian dari Tugas Tambahan Linier Ekuivalensi (TTLE).
+  - Syarat Validasi TPG: Sebagai syarat untuk validasi TPG, Guru Wajib Memiliki 16 Jam + 3 TTLE (6 Jam) + 2 JP Untuk Guru Wali agar bisa mendapatkan Tunjangan Sertifikasi.
 
 Fokus Bidang Kejuruan di SMKPP Negeri Bima:
 1. Agribisnis Tanaman Pangan & Hortikultura (ATPH - Kode 401)
